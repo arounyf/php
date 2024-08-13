@@ -1,0 +1,12 @@
+services:  
+  php:  
+    image: runyf/php:7.4-fpm
+    container_name: php  
+    network_mode: bridge
+    restart: unless-stopped  
+    ports:  
+      - "9000:9000"  
+      - "8011:8000"  
+    volumes:  
+      - ~/nginx/html:/www  
+

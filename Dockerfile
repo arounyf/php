@@ -265,18 +265,38 @@ RUN set -eux; \
 
 
 # by runyf
-RUN echo "Asia/Shanghai" > /etc/timezone; \
+RUN set -eux; \
+	# set timezone is Asia/Shanghai
+	cd /root; \
+	echo "Asia/Shanghai" > /etc/timezone; \
 	ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime; \
 	printf '[PHP]\ndate.timezone = Asia/Shanghai\n' > /usr/local/etc/php/conf.d/tzone.ini; \
+	# install composer
+	php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');"; \
+	php composer-setup.php; \
+	php -r "unlink('composer-setup.php');"; \
+	mv composer.phar /usr/local/bin/composer; \
+	composer --version; \
+	#install mysql
 	docker-php-ext-install pdo pdo_mysql; \
 	docker-php-ext-install mysqli; \
-	# Asia/Shanghai timezone
+	# install gd
+	apt-get update; \
+	apt-get install unzip; \
+	apt-get install -y libwebp-dev libjpeg-dev libpng-dev libfreetype6-dev; \
+	docker-php-source extract; \
+	cd /usr/src/php/ext/gd; \
+	docker-php-ext-configure gd --with-webp=/usr/include/webp --with-jpeg=/usr/include --with-freetype=/usr/include/freetype2/; \
+	docker-php-ext-install gd; \
+	php -m | grep gd; \
+	# install PHP-zip
+	apt-get install -y zlib1g-dev && apt-get install -y libzip-dev; \
+	docker-php-ext-install zip; \
+	# install PHP-bcmath
+	docker-php-ext-install bcmath; \
+	# install topthink/think-captcha; \
+	composer require topthink/think-captcha
 	
-	php -r "copy('https://install.phpcomposer.com/installer', 'composer-setup.php');" \
-	php composer-setup.php \
-	php -r "unlink('composer-setup.php');" \
-	mv composer.phar /usr/local/bin/composer
-	# install php-Composer
 	
 
 
